@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Function to check and fill the headline if empty
   function checkAndFillHeadline() {
     if (exitHeadline.textContent.trim() === "") {
-      exitHeadline.textContent = "Check out a HELOC alternative.";
+      exitHeadline.textContent = "Get up to $500k.";
     }
   }
 
@@ -28,11 +28,11 @@ document.addEventListener("DOMContentLoaded", function () {
     setTimeout(() => {
       section.style.display = "none";
     }, 1500); // Assuming the transition duration to zero opacity is 1.5 seconds
-    localStorage.setItem("exitPopupDismissed", "true"); // Store dismissal in local storage
+    sessionStorage.setItem("exitPopupDismissed", "true"); // Store dismissal in session storage
   }
 
   // Check if the popup was already dismissed
-  if (localStorage.getItem("exitPopupDismissed") === "true") {
+  if (sessionStorage.getItem("exitPopupDismissed") === "true") {
     return; // Do not show the popup if it was dismissed before
   }
 
@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Existing desktop functionality with mouseleave
   document.addEventListener("mouseleave", function (event) {
-    if (event.clientY <= 0 && localStorage.getItem("exitPopupDismissed") !== "true") {
+    if (event.clientY <= 0 && sessionStorage.getItem("exitPopupDismissed") !== "true") {
       showPopup();
     }
   });
@@ -70,14 +70,14 @@ document.addEventListener("DOMContentLoaded", function () {
   // Detect Scroll Up at the Top of the Page for mobile
   document.addEventListener("touchmove", function (event) {
     var currentScroll = window.scrollY || document.documentElement.scrollTop;
-    if (currentScroll <= 0 && event.touches[0].clientY > event.touches[0].screenY && localStorage.getItem("exitPopupDismissed") !== "true") {
+    if (currentScroll <= 0 && event.touches[0].clientY > event.touches[0].screenY && sessionStorage.getItem("exitPopupDismissed") !== "true") {
       showPopup();
     }
   });
 
   // Use the Visibility Change Event for mobile
   document.addEventListener("visibilitychange", function () {
-    if (document.visibilityState === "hidden" && localStorage.getItem("exitPopupDismissed") !== "true") {
+    if (document.visibilityState === "hidden" && sessionStorage.getItem("exitPopupDismissed") !== "true") {
       showPopup();
     }
   });
