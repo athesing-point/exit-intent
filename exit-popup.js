@@ -24,6 +24,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function closePopup() {
     exitModal.style.opacity = "0";
     background.style.opacity = "0";
+    background.style.background = "rgba(113, 116, 117, 0)"; // Transition back to transparent
     exitModal.style.transform = "translateY(0px)";
     setTimeout(() => {
       section.style.display = "none";
@@ -56,6 +57,7 @@ document.addEventListener("DOMContentLoaded", function () {
       exitModal.style.transform = "translateY(0px)"; // Starting value is set in CSS on component in PDC.
       exitModal.style.opacity = "1";
       background.style.opacity = "1";
+      background.style.background = "rgba(113, 116, 117, .25)"; // Set the final background color with opacity
     }, 25);
   }
 
