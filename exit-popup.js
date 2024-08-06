@@ -75,10 +75,13 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+  // Remove or comment out the following block:
+  /*
   // Use the Visibility Change Event for mobile
   document.addEventListener("visibilitychange", function () {
     if (document.visibilityState === "hidden" && sessionStorage.getItem("exitPopupDismissed") !== "true") {
       showPopup();
     }
   });
+  */
 });
