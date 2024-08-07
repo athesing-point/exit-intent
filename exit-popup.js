@@ -20,6 +20,10 @@ document.addEventListener("DOMContentLoaded", function () {
   // Call the function to check and fill the headline
   checkAndFillHeadline();
 
+  function getDismissalKey() {
+    return `exitPopupDismissedTime_${window.location.hostname}`;
+  }
+
   // Function to close the popup and remember the dismissal
   function closePopup() {
     exitModal.style.opacity = "0";
@@ -28,12 +32,23 @@ document.addEventListener("DOMContentLoaded", function () {
     setTimeout(() => {
       section.style.display = "none";
     }, 1500); // Assuming the transition duration to zero opacity is 1.5 seconds
-    sessionStorage.setItem("exitPopupDismissed", "true"); // Store dismissal in session storage
+
+    // Store dismissal time in localStorage with domain-specific key
+    localStorage.setItem(getDismissalKey(), Date.now());
   }
 
-  // Check if the popup was already dismissed
-  if (sessionStorage.getItem("exitPopupDismissed") === "true") {
-    return; // Do not show the popup if it was dismissed before
+  // Check if the popup was already dismissed and if the cooldown period has passed
+  function canShowPopup() {
+    const dismissedTime = localStorage.getItem(getDismissalKey());
+    if (!dismissedTime) return true;
+
+    const cooldownPeriod = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+    return Date.now() - parseInt(dismissedTime) > cooldownPeriod;
+  }
+
+  // Check if the popup was already dismissed and if the cooldown period has passed
+  if (!canShowPopup()) {
+    return; // Do not show the popup if it was dismissed recently
   }
 
   // Close popup when clicking the close button
@@ -61,7 +76,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Existing desktop functionality with mouseleave
   document.addEventListener("mouseleave", function (event) {
-    if (event.clientY <= 0 && sessionStorage.getItem("exitPopupDismissed") !== "true") {
+    if (event.clientY <= 0 && canShowPopup()) {
       showPopup();
     }
   });
@@ -70,18 +85,8 @@ document.addEventListener("DOMContentLoaded", function () {
   // Detect Scroll Up at the Top of the Page for mobile
   document.addEventListener("touchmove", function (event) {
     var currentScroll = window.scrollY || document.documentElement.scrollTop;
-    if (currentScroll <= 0 && event.touches[0].clientY > event.touches[0].screenY && sessionStorage.getItem("exitPopupDismissed") !== "true") {
+    if (currentScroll <= 0 && event.touches[0].clientY > event.touches[0].screenY && canShowPopup()) {
       showPopup();
     }
   });
-
-  // Remove or comment out the following block:
-  /*
-  // Use the Visibility Change Event for mobile
-  document.addEventListener("visibilitychange", function () {
-    if (document.visibilityState === "hidden" && sessionStorage.getItem("exitPopupDismissed") !== "true") {
-      showPopup();
-    }
-  });
-  */
 });
