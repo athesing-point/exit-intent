@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
   postContents.forEach((element) => {
     totalHeight += element.offsetHeight;
   });
-  console.log("Total height of post contents:", totalHeight);
+  // console.log("Total height of post contents:", totalHeight);
 
   if (!exitModal || !closeButton || !background || !section || !exitHeadline || !postContents) {
     console.error("One or more elements are missing!");
@@ -66,27 +66,27 @@ document.addEventListener("DOMContentLoaded", function () {
   function checkFeatureFlags() {
     try {
       const featureFlagValue = posthog.getFeatureFlag("cro14-exit-intent-logic");
-      //console.log(`Feature flag 'exit-popup-test': ${featureFlagValue}`);
+      // console.log(`Feature flag 'exit-popup-test': ${featureFlagValue}`);
 
       if (featureFlagValue === "test") {
-        console.log("Exit popup: Test variant activated");
+        // console.log("Exit popup: Test variant activated");
         // Test variant: Show popup after 70% scroll
         let hasShown = false;
         window.addEventListener("scroll", function () {
           if (!hasShown && canShowPopup()) {
             const scrollPercentage = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
-            //console.log("Scroll percentage:", scrollPercentage);
-            if (scrollPercentage >= 70) {
+            // console.log("Scroll percentage:", scrollPercentage);
+            if (scrollPercentage >= 66) {
               showPopup();
               hasShown = true;
             }
           }
         });
       } else if (featureFlagValue === "control") {
-        console.log("Exit popup: Control variant activated");
+        // console.log("Exit popup: Control variant activated");
         // Control: Original exit-intent behavior
         document.addEventListener("mouseleave", function (event) {
-          //console.log("Mouse leave event:", event.clientY);
+          // console.log("Mouse leave event:", event.clientY);
           if (event.clientY <= 0 && canShowPopup()) {
             showPopup();
           }
@@ -94,7 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         document.addEventListener("touchmove", function (event) {
           var currentScroll = window.scrollY || document.documentElement.scrollTop;
-          //console.log("Touch move event:", currentScroll, event.touches[0].clientY, event.touches[0].screenY);
+          // console.log("Touch move event:", currentScroll, event.touches[0].clientY, event.touches[0].screenY);
           if (currentScroll <= 0 && event.touches[0].clientY > event.touches[0].screenY && canShowPopup()) {
             showPopup();
           }
