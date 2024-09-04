@@ -4,9 +4,16 @@ document.addEventListener("DOMContentLoaded", function () {
   const background = document.querySelector(".modal-bg-layer");
   const section = document.querySelector(".section-exit-popup");
   const exitHeadline = document.getElementById("exit-headline");
-  const postContent = document.querySelector(".blog-rich-text"); // Adjust selector as needed
+  const postContents = document.querySelectorAll(".blog-rich-text"); // Adjust selector as needed
 
-  if (!exitModal || !closeButton || !background || !section || !exitHeadline || !postContent) {
+  // Calculate total height of all postContent elements
+  let totalHeight = 0;
+  postContents.forEach((element) => {
+    totalHeight += element.offsetHeight;
+  });
+  console.log("Total height of post contents:", totalHeight);
+
+  if (!exitModal || !closeButton || !background || !section || !exitHeadline || !postContents) {
     console.error("One or more elements are missing!");
     return;
   }
@@ -56,36 +63,76 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 25);
   }
 
-  // PostHog feature flag check
-  posthog.onFeatureFlags(function () {
-    const isTestVariant = posthog.getFeatureFlag("exit-popup-test") === "test";
+  function checkFeatureFlags() {
+    try {
+      const featureFlagValue = posthog.getFeatureFlag("cro14-exit-intent-logic");
+      //console.log(`Feature flag 'exit-popup-test': ${featureFlagValue}`);
 
-    if (isTestVariant) {
-      // Test variant: Show popup after 50% scroll
-      let hasShown = false;
-      window.addEventListener("scroll", function () {
-        if (!hasShown && canShowPopup()) {
-          const scrollPercentage = (window.scrollY / (postContent.offsetHeight - window.innerHeight)) * 100;
-          if (scrollPercentage >= 50) {
-            showPopup();
-            hasShown = true;
+      if (featureFlagValue === "test") {
+        console.log("Exit popup: Test variant activated");
+        // Test variant: Show popup after 70% scroll
+        let hasShown = false;
+        window.addEventListener("scroll", function () {
+          if (!hasShown && canShowPopup()) {
+            const scrollPercentage = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+            //console.log("Scroll percentage:", scrollPercentage);
+            if (scrollPercentage >= 70) {
+              showPopup();
+              hasShown = true;
+            }
           }
-        }
-      });
-    } else {
-      // Control: Original exit-intent behavior
-      document.addEventListener("mouseleave", function (event) {
-        if (event.clientY <= 0 && canShowPopup()) {
-          showPopup();
-        }
-      });
+        });
+      } else if (featureFlagValue === "control") {
+        console.log("Exit popup: Control variant activated");
+        // Control: Original exit-intent behavior
+        document.addEventListener("mouseleave", function (event) {
+          //console.log("Mouse leave event:", event.clientY);
+          if (event.clientY <= 0 && canShowPopup()) {
+            showPopup();
+          }
+        });
 
-      document.addEventListener("touchmove", function (event) {
-        var currentScroll = window.scrollY || document.documentElement.scrollTop;
-        if (currentScroll <= 0 && event.touches[0].clientY > event.touches[0].screenY && canShowPopup()) {
-          showPopup();
+        document.addEventListener("touchmove", function (event) {
+          var currentScroll = window.scrollY || document.documentElement.scrollTop;
+          //console.log("Touch move event:", currentScroll, event.touches[0].clientY, event.touches[0].screenY);
+          if (currentScroll <= 0 && event.touches[0].clientY > event.touches[0].screenY && canShowPopup()) {
+            showPopup();
+          }
+        });
+      } else {
+        console.warn("Unknown feature flag value:", featureFlagValue);
+      }
+    } catch (error) {
+      console.error("Error in checkFeatureFlags:", error);
+    }
+  }
+
+  function observePostHogInitialization() {
+    const observer = new MutationObserver((mutationsList, observer) => {
+      mutationsList.forEach((mutation) => {
+        if (mutation.type === "childList" && typeof posthog !== "undefined" && posthog.getFeatureFlag) {
+          observer.disconnect();
+          checkFeatureFlags();
         }
       });
+    });
+
+    observer.observe(document, { childList: true, subtree: true });
+
+    // Set a timeout to default to control if PostHog doesn't load
+    setTimeout(() => {
+      if (typeof posthog === "undefined" || !posthog.getFeatureFlag) {
+        observer.disconnect();
+        console.warn("PostHog not loaded, defaulting to control behavior");
+      }
+    }, 3000); // 3 second timeout
+  }
+
+  window.addEventListener("load", function () {
+    if (typeof posthog !== "undefined" && posthog.getFeatureFlag) {
+      checkFeatureFlags();
+    } else {
+      observePostHogInitialization();
     }
   });
 });
