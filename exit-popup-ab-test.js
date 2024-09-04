@@ -4,17 +4,19 @@ document.addEventListener("DOMContentLoaded", function () {
   const background = document.querySelector(".modal-bg-layer");
   const section = document.querySelector(".section-exit-popup");
   const exitHeadline = document.getElementById("exit-headline");
-  const postContents = document.querySelectorAll(".blog-rich-text"); // Adjust selector as needed
+  const postContents = document.querySelectorAll(".blog-rich-text");
 
-  // Calculate total height of all postContent elements
   let totalHeight = 0;
-  postContents.forEach((element) => {
-    totalHeight += element.offsetHeight;
-  });
-  // console.log("Total height of post contents:", totalHeight);
+  if (postContents.length > 0) {
+    postContents.forEach((element) => {
+      totalHeight += element.offsetHeight;
+    });
+  } else {
+    totalHeight = document.documentElement.scrollHeight;
+  }
 
-  if (!exitModal || !closeButton || !background || !section || !exitHeadline || !postContents) {
-    console.error("One or more elements are missing!");
+  if (!exitModal || !closeButton || !background || !section || !exitHeadline) {
+    console.error("One or more essential elements are missing!");
     return;
   }
 
@@ -66,16 +68,12 @@ document.addEventListener("DOMContentLoaded", function () {
   function checkFeatureFlags() {
     try {
       const featureFlagValue = posthog.getFeatureFlag("cro14-exit-intent-logic");
-      // console.log(`Feature flag 'exit-popup-test': ${featureFlagValue}`);
 
       if (featureFlagValue === "test") {
-        // console.log("Exit popup: Test variant activated");
-        // Test variant: Show popup after 70% scroll
         let hasShown = false;
         window.addEventListener("scroll", function () {
           if (!hasShown && canShowPopup()) {
-            const scrollPercentage = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
-            // console.log("Scroll percentage:", scrollPercentage);
+            const scrollPercentage = (window.scrollY / (totalHeight - window.innerHeight)) * 100;
             if (scrollPercentage >= 66) {
               showPopup();
               hasShown = true;
@@ -83,7 +81,6 @@ document.addEventListener("DOMContentLoaded", function () {
           }
         });
       } else if (featureFlagValue === "control") {
-        // console.log("Exit popup: Control variant activated");
         // Control: Original exit-intent behavior
         document.addEventListener("mouseleave", function (event) {
           // console.log("Mouse leave event:", event.clientY);
