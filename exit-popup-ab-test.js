@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function checkFeatureFlags() {
     try {
-      const featureFlagValue = posthog.getFeatureFlag("cro14-exit-intent-logic");
+      const featureFlagValue = posthog.getFeatureFlag("cro20-modal-test");
 
       if (featureFlagValue === "test") {
         let hasShown = false;
