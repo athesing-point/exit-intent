@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Function to check and fill the headline if empty
   function checkAndFillHeadline() {
     if (exitHeadline.textContent.trim() === "") {
-      exitHeadline.textContent = "Get up to $500k.";
+      exitHeadline.textContent = "Get up to $600k.";
     }
   }
 
